@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, ArrowRight, Info, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -25,19 +29,45 @@ export default function Login() {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setCargando(true);
+    setError("");
     
-  
-    let rolUsuario = "productor"; 
-    
-    if (email.toLowerCase().includes("ingeniero")) {
-      rolUsuario = "ingeniero";
-    } else if (email.toLowerCase().includes("cliente")) {
-      rolUsuario = "cliente";
-    }
+    const userLower = usuario.toLowerCase();
 
-    navigate("/dashboard", { state: { rol: rolUsuario } });
+    try {
+      if (userLower.includes("admin") || userLower.includes("productor")) {
+        setTimeout(() => navigate("/dashboard", { state: { rol: "productor" } }), 800);
+        return;
+      } 
+      if (userLower.includes("ingeniero")) {
+        setTimeout(() => navigate("/dashboard", { state: { rol: "ingeniero" } }), 800);
+        return;
+      }
+
+      const res = await fetch("http://127.0.0.1:8000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario: usuario, contrasena: contrasena })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Error al validar credenciales");
+      }
+
+      localStorage.setItem("sonora_ruc", data.ruc);
+      localStorage.setItem("sonora_nombre", data.nombre);
+      localStorage.setItem("sonora_rol", data.rol);
+
+      navigate("/dashboard", { state: { rol: data.rol } });
+
+    } catch (err) {
+      setError(err.message);
+      setCargando(false);
+    }
   };
 
   return (
@@ -92,9 +122,22 @@ export default function Login() {
         <motion.div variants={itemVariants} className="mb-6 p-3 rounded-lg bg-[#6D001A]/10 border border-[#6D001A]/20 flex items-start gap-3">
           <Info size={16} className="text-[#8E0B2B] mt-0.5 flex-shrink-0" />
           <p className="text-xs text-gray-400 leading-relaxed">
-            <strong className="text-gray-300">Modo Demo:</strong> Usa correos con <span className="text-white">admin@</span>, <span className="text-white">ingeniero@</span> o <span className="text-white">cliente@</span> para probar los distintos perfiles de acceso.
+            <strong className="text-gray-300">Modo Demo:</strong> Usa <span className="text-white">admin@</span> o <span className="text-white">ingeniero@</span>. Para clientes, ingresa su <span className="text-white">RUC</span> real y contraseña.
           </p>
         </motion.div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }} 
+              animate={{ opacity: 1, height: "auto", marginBottom: 24 }} 
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }} 
+              className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl flex items-center gap-3 text-sm"
+            >
+              <AlertCircle size={16} className="flex-shrink-0" /> {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form className="space-y-6" onSubmit={handleLogin}>
           <motion.div variants={itemVariants}>
@@ -103,12 +146,12 @@ export default function Login() {
                 <Mail className="h-5 w-5 text-gray-500 group-focus-within:text-[#6D001A] transition-colors duration-700" />
               </div>
               <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text" 
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
                 required
                 className="block w-full pl-12 pr-4 py-3.5 bg-black/50 border border-white/[0.04] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-[#8E0B2B]/50 focus:border-[#8E0B2B]/50 transition-all duration-700 hover:bg-white/[0.02]"
-                placeholder="usuario@sonorastudio.com"
+                placeholder="usuario@correo.com o RUC"
               />
             </div>
           </motion.div>
@@ -120,6 +163,8 @@ export default function Login() {
               </div>
               <input 
                 type="password" 
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
                 required
                 className="block w-full pl-12 pr-4 py-3.5 bg-black/50 border border-white/[0.04] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-[#8E0B2B]/50 focus:border-[#8E0B2B]/50 transition-all duration-700 hover:bg-white/[0.02]"
                 placeholder="••••••••"
@@ -130,12 +175,19 @@ export default function Login() {
           <motion.div variants={itemVariants} className="pt-4">
             <button 
               type="submit" 
-              className="group relative w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-br from-[#6D001A] via-[#8E0B2B] to-[#6D001A] hover:from-[#8E0B2B] hover:to-[#8E0B2B] transition-all duration-700 overflow-hidden shadow-[0_0_20px_rgba(109,0,26,0.15)] hover:shadow-[0_0_35px_rgba(109,0,26,0.3)]"
+              disabled={cargando}
+              className="group relative w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-br from-[#6D001A] via-[#8E0B2B] to-[#6D001A] hover:from-[#8E0B2B] hover:to-[#8E0B2B] transition-all duration-700 overflow-hidden shadow-[0_0_20px_rgba(109,0,26,0.15)] hover:shadow-[0_0_35px_rgba(109,0,26,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-700"></div>
               <span className="relative z-10 flex items-center gap-2">
-                Acceder al Estudio
-                <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform duration-500" />
+                {cargando ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    Acceder al Estudio
+                    <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform duration-500" />
+                  </>
+                )}
               </span>
             </button>
           </motion.div>
