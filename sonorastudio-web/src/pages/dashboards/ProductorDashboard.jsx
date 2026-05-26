@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, TrendingUp, Receipt, Users, LogOut, Plus, Search, Filter, AlertTriangle, CheckCircle, Clock, MoreVertical, BarChart2, Activity, Star, Cpu, ChevronDown, Download } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Receipt, Users, LogOut, Plus, Search, Filter, AlertTriangle, CheckCircle, Clock, MoreVertical, BarChart2, Activity, Star, Cpu, ChevronDown, Download, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -19,23 +19,27 @@ export default function ProductorDashboard({ navigate }) {
   const [error, setError] = useState(null);
   const [finanzas, setFinanzas] = useState({ ingresos_mes: 0, cuentas_por_cobrar: 0, facturas_pendientes: 0 });
 
+  // --- FEATURE FLAG: PRÓXIMAMENTE ---
+  const [mostrarProximamente, setMostrarProximamente] = useState(false);
+  const handleProximamente = () => {
+      setMostrarProximamente(true);
+      setTimeout(() => setMostrarProximamente(false), 3000);
+  };
+
   // --- ESTADOS DINÁMICOS PARA BUSINESS INTELLIGENCE Y EQUIPO ---
   const [biTendenciaAnual, setBiTendenciaAnual] = useState([]);
   const [biTopClientes, setBiTopClientes] = useState([]);
   const [biDistribucionServicios, setBiDistribucionServicios] = useState([]);
   const [equipoTecnico, setEquipoTecnico] = useState([]);
   
-  const COLORES_PIE = ["#D94667", "#8E0B2B", "#4A0011", "#1A0006"]; // Añadí un color oscuro extra por si hay más de 3 servicios
+  const COLORES_PIE = ["#D94667", "#8E0B2B", "#4A0011", "#1A0006"]; 
 
-  // Efecto: Cargar Datos BI y Finanzas al inicio de forma concurrente
   useEffect(() => {
-    // 1. Cargar Finanzas
     fetch('http://127.0.0.1:8000/api/dashboard/finanzas')
       .then(res => res.ok ? res.json() : null)
       .then(data => data && setFinanzas(data))
       .catch(err => console.error("Error cargando finanzas:", err));
 
-    // 2. Cargar Gráficos y Equipo Técnico en paralelo (Súper rápido)
     Promise.all([
       fetch('http://127.0.0.1:8000/api/dashboard/bi/tendencia').then(res => res.ok ? res.json() : []),
       fetch('http://127.0.0.1:8000/api/dashboard/bi/top-clientes').then(res => res.ok ? res.json() : []),
@@ -51,7 +55,6 @@ export default function ProductorDashboard({ navigate }) {
     .catch(err => console.error("Error cargando BI:", err));
   }, []);
 
-  // Efecto: Carga la tabla de Producción y responde a búsquedas
   useEffect(() => {
     setCargando(true);
 
@@ -63,7 +66,7 @@ export default function ProductorDashboard({ navigate }) {
 
       fetch(`http://127.0.0.1:8000/api/dashboard/productor?${parametros.toString()}`)
         .then((response) => {
-          if (!response.ok) throw new Error('Error de conexión con el servidor (FastAPI)');
+          if (!response.ok) throw new Error('Error de conexión con el servidor');
           return response.json();
         })
         .then((data) => {
@@ -223,7 +226,11 @@ export default function ProductorDashboard({ navigate }) {
                   >
                     <Download size={16} /> Exportar Reporte
                   </button>
-                  <button className="flex items-center gap-2 bg-gradient-to-br from-[#6D001A] via-[#8E0B2B] to-[#6D001A] hover:from-[#8E0B2B] hover:to-[#8E0B2B] px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-500 shadow-[0_0_20px_rgba(109,0,26,0.15)]">
+                  {/* BOTÓN NUEVO PROYECTO ACTUALIZADO */}
+                  <button 
+                    onClick={handleProximamente}
+                    className="flex items-center gap-2 bg-gradient-to-br from-[#6D001A] via-[#8E0B2B] to-[#6D001A] hover:from-[#8E0B2B] hover:to-[#8E0B2B] px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-500 shadow-[0_0_20px_rgba(109,0,26,0.15)]"
+                  >
                     <Plus size={16} /> Nuevo Proyecto
                   </button>
                 </div>
@@ -345,7 +352,11 @@ export default function ProductorDashboard({ navigate }) {
                                   </span>
                                 </td>
                                 <td className="py-4 px-6 text-right">
-                                  <button className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
+                                  {/* BOTÓN DE ACCIONES ACTUALIZADO */}
+                                  <button 
+                                    onClick={handleProximamente}
+                                    className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                  >
                                     <MoreVertical size={16} />
                                   </button>
                                 </td>
@@ -512,9 +523,6 @@ export default function ProductorDashboard({ navigate }) {
             </motion.div>
           )}
 
-          {/* ==========================================
-              NUEVA PESTAÑA: EQUIPO TÉCNICO
-          ========================================== */}
           {tab === "equipo" && (
             <motion.div 
               key="equipo" 
@@ -528,7 +536,11 @@ export default function ProductorDashboard({ navigate }) {
                   <h1 className="text-3xl font-bold tracking-tight">Equipo Técnico</h1>
                   <p className="text-gray-500 text-sm uppercase mt-1">Análisis de Rendimiento & Carga Operativa</p>
                 </div>
-                <button className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors duration-300">
+                {/* BOTON AÑADIR INGENIERO ACTUALIZADO */}
+                <button 
+                  onClick={handleProximamente}
+                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors duration-300"
+                >
                   <Plus size={16} /> Añadir Ingeniero
                 </button>
               </motion.header>
@@ -555,7 +567,6 @@ export default function ProductorDashboard({ navigate }) {
                       variants={cardVariant}
                       className={`bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden transition-colors duration-500 ${expandido ? 'ring-1 ring-[#8E0B2B]/40 bg-white/[0.04]' : 'hover:bg-white/[0.03]'}`}
                     >
-                      {/* Cabecera Clickable de la Tarjeta */}
                       <div className="p-6 flex items-center justify-between cursor-pointer group" onClick={() => {
                         setIngenieroExpandido(expandido ? null : miembro.id);
                         if (viendoHistorial === miembro.id) setViendoHistorial(null);
@@ -578,7 +589,6 @@ export default function ProductorDashboard({ navigate }) {
                         </div>
 
                         <div className="flex items-center gap-8 md:gap-12">
-                          {/* Mini Barra de Carga Rápida */}
                           <div className="hidden md:block w-32">
                             <div className="flex justify-between text-[10px] mb-1.5 uppercase tracking-tighter text-gray-500">
                               <span>Carga</span>
@@ -594,14 +604,12 @@ export default function ProductorDashboard({ navigate }) {
                             </div>
                           </div>
                           
-                          {/* Ícono de Chevron Animado */}
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${expandido ? 'bg-[#8E0B2B]/20 text-[#D94667] rotate-180' : 'bg-white/[0.05] text-gray-500 group-hover:bg-white/[0.1] group-hover:text-white'}`}>
                             <ChevronDown size={18} />
                           </div>
                         </div>
                       </div>
 
-                      {/* Desplegable Cinematográfico */}
                       <AnimatePresence>
                         {expandido && (
                           <motion.div 
@@ -613,12 +621,10 @@ export default function ProductorDashboard({ navigate }) {
                           >
                             <div className="px-6 pb-6 pt-4 border-t border-white/[0.05] bg-black/40">
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                {/* Metrica 1 */}
                                 <div className="space-y-2">
                                   <p className="text-[10px] uppercase text-gray-500 flex items-center gap-2"><Cpu size={12}/> Software Principal</p>
                                   <p className="text-white font-medium">{miembro.software}</p>
                                 </div>
-                                {/* Metrica 2 */}
                                 <div className="space-y-2">
                                   <p className="text-[10px] uppercase text-gray-500 flex items-center gap-2"><Star size={12} className="text-yellow-500"/> Calidad QC</p>
                                   <div className="flex items-center gap-2">
@@ -628,12 +634,10 @@ export default function ProductorDashboard({ navigate }) {
                                     </div>
                                   </div>
                                 </div>
-                                {/* Metrica 3 */}
                                 <div className="space-y-2">
                                   <p className="text-[10px] uppercase text-gray-500 flex items-center gap-2"><Activity size={12} className="text-green-500"/> Índice Velocidad</p>
                                   <p className="text-2xl font-bold text-white">{miembro.velocidad}<span className="text-sm font-light text-gray-500 ml-1">%</span></p>
                                 </div>
-                                {/* Botones Acción */}
                                 <div className="flex items-center justify-end gap-3 mt-4 md:mt-0">
                                   <button 
                                     onClick={() => cargarHistorial(miembro.id)}
@@ -644,7 +648,6 @@ export default function ProductorDashboard({ navigate }) {
                                 </div>
                               </div>
 
-                              {/* SECCIÓN INTERNA: HISTORIAL DE PROYECTOS */}
                               <AnimatePresence>
                                 {viendoHistorial === miembro.id && (
                                   <motion.div
@@ -697,6 +700,33 @@ export default function ProductorDashboard({ navigate }) {
 
         </AnimatePresence>
       </main>
+      
+      {/* EL COMPONENTE TOAST FLOTANTE */}
+      <AnimatePresence>
+        {mostrarProximamente && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-8 right-8 bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 px-5 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] flex items-center gap-4 z-50 overflow-hidden"
+          >
+            {/* Brillo sutil de fondo con los colores de la marca */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#8E0B2B]/10 to-transparent pointer-events-none"></div>
+
+            {/* Ícono animado */}
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#8E0B2B] to-[#4A0011] shadow-[0_0_15px_rgba(142,11,43,0.4)]">
+               <Sparkles size={18} className="text-white animate-pulse" />
+            </div>
+
+            {/* Textos tipográficos limpios */}
+            <div className="relative z-10 pr-2">
+              <h4 className="font-semibold text-white/90 text-sm tracking-wide">Próximamente</h4>
+              <p className="text-[11px] text-gray-400 mt-0.5">Esta función estará lista en la V2.0</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
