@@ -55,7 +55,6 @@ export default function ClienteDashboard({ navigate }) {
     navigate("/login");
   };
 
-  // --- LÓGICA DE FILTRADO CON LENGUAJE DE CLIENTE ---
   const filtrados = entregas.filter(item => {
     const coincideBusqueda = 
       (item.nombre_proyecto && item.nombre_proyecto.toLowerCase().includes(busqueda.toLowerCase())) || 
@@ -76,7 +75,6 @@ export default function ClienteDashboard({ navigate }) {
     return coincideBusqueda && coincideFiltro;
   });
 
-  // --- CONTADORES DINÁMICOS PARA LAS PASTILLAS ---
   const contadores = {
     "Todos": entregas.length,
     "En Estudio": entregas.filter(e => (e.estado_episodio || "En Bruto") === "En Bruto").length,
@@ -94,7 +92,6 @@ export default function ClienteDashboard({ navigate }) {
       "Aprobado": "bg-green-500/10 text-green-400 border-green-500/20"
     };
     
-    // Nombres más amigables para la tabla
     const nombreVisual = estado === "En Bruto" ? "En Estudio" : 
                          estado === "Aprobado" ? "Finalizado" : estado;
 
@@ -116,7 +113,6 @@ export default function ClienteDashboard({ navigate }) {
   return (
     <div className="min-h-screen bg-black flex text-white font-sans antialiased relative">
       
-      {/* SIDEBAR */}
       <aside className="w-64 bg-white/[0.01] backdrop-blur-3xl border-r border-white/[0.05] p-6 flex flex-col z-20">
         <div className="mb-10">
           <h2 className="text-xl font-bold tracking-tighter">
@@ -149,7 +145,6 @@ export default function ClienteDashboard({ navigate }) {
         </button>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 p-10 bg-gradient-to-tr from-black via-black to-[#6D001A]/5 overflow-y-auto relative z-10">
         <motion.div className="max-w-6xl mx-auto relative z-10" initial="hidden" animate="show" variants={staggerContainer}>
           
@@ -168,7 +163,6 @@ export default function ClienteDashboard({ navigate }) {
             </div>
           </motion.header>
 
-          {/* PASTILLAS DE FILTROS ACTUALIZADAS & BUSCADOR */}
           <motion.div variants={cardVariant} className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6">
             <div className="flex flex-wrap bg-white/[0.02] border border-white/[0.05] rounded-xl p-1 relative">
               {pestañasFiltro.map(filtro => (
@@ -211,7 +205,6 @@ export default function ClienteDashboard({ navigate }) {
             </div>
           </motion.div>
 
-          {/* TABLA CORPORATIVA CON ENFOQUE AL CLIENTE */}
           <div className="min-h-[400px]">
             {cargando ? (
               <div className="py-20 flex flex-col justify-center items-center h-full">
@@ -333,7 +326,6 @@ export default function ClienteDashboard({ navigate }) {
         </motion.div>
       </main>
 
-      {/* TOAST FLOTANTE PREMIUM */}
       <AnimatePresence>
         {mostrarProximamente && (
           <motion.div 
